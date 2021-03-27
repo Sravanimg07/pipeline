@@ -1,0 +1,25 @@
+pipeline {
+    agent any
+    environment {
+        PATH = "/opt/apache-maven-3.6.3/bin:$PATH"
+        }
+    stages {
+        stage("Git clone"){
+            steps {
+                git 'https://github.com/yankils/hello-world.git'
+            }
+        }    
+        stage("Maven Build"){
+            steps{
+            sh "mvn clean install"
+            }
+        }
+            stage("Deploy"){
+            steps{
+           sshagent(['deploy-tomcat']) {
+            sh "scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/Pipeline_deploy_tomcat/webapp/target/webapp.war ec2-user@15.206.186.183:/opt/apache-tomcat-9.0.44/webapps"
+            }
+            }
+        }
+    }
+}
